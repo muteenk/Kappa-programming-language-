@@ -1,3 +1,5 @@
+import kappa
+
 while True:
     inp = input("Kappa >>")
-    print(inp)
+    print(kappa.exec(inp))

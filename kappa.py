@@ -18,34 +18,21 @@ LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 T_STRING = "STR"
 T_INT = "INT"
 T_FLOAT = "FLOAT"
-T_PLUS = "+"
-T_MIN = "-"
-T_MUL = "*"
-T_DIV = "/"
-T_ASIGN = "="
-T_EQUAL = "=="
-T_LESS = "<"
-T_GREATER = ">"
-T_LCURL = "{"
-T_RCURL = "]"
-T_LBRAC = "["
-T_RBRAC = "]"
-T_LPAREN = "("
-T_RPAREN = ")"
+T_PLUS = "PLUS"
+T_MIN = "MINUS"
+T_MUL = "MULTIPLY"
+T_DIV = "DIVIDE"
+T_ASIGN = "ASSIGN"
+T_EQUAL = "EQUAL"
+T_LESS = "LESS"
+T_GREATER = "GREATER"
+T_LCURL = "LCURLY"
+T_RCURL = "RCURLY"
+T_LBRAC = "LBRACKET"
+T_RBRAC = "RBRACKET"
+T_LPAREN = "LPARENTHESIS"
+T_RPAREN = "RPARENTHESIS"
 
-
-
-class Token:
-
-    def __init__(self, _type, val):
-        self.type = _type
-        self.value = val
-
-    def __repr__(self):
-        if self.value:
-            return f"{self.value}:{self.type}"
-        else:
-            return f"{self.type}"
 
 #####################
 # Lexer
@@ -73,39 +60,67 @@ class Lexer:
             if self.currentChar == " " or self.currentChar == "\t" or self.currentChar == "\n" or self.currentChar == "":
                 self.shiftChar()
             elif self.currentChar in NUMBERS:
-                tokens.append(self.numToken())
+                tokens.append(self.numToken(self.currentChar))
             elif self.currentChar == "+":
-                tokens.append(Token(T_PLUS))
+                tokens.append(self.tokenizer(T_PLUS))
                 self.shiftChar()
             elif self.currentChar == "-":
-                tokens.append(Token(T_MIN))
+                tokens.append(self.tokenizer(T_MIN))
                 self.shiftChar() 
             elif self.currentChar == "*":
-                tokens.append(Token(T_MUL))
+                tokens.append(self.tokenizer(T_MUL))
                 self.shiftChar()   
             elif self.currentChar == "/":
-                tokens.append(Token(T_DIV))
+                tokens.append(self.tokenizer(T_DIV))
                 self.shiftChar()
             elif self.currentChar == "(":
-                tokens.append(Token(T_LPAREN))
+                tokens.append(self.tokenizer(T_LPAREN))
                 self.shiftChar()
             elif self.currentChar == ")":
-                tokens.append(Token(T_RPAREN))
+                tokens.append(self.tokenizer(T_RPAREN))
                 self.shiftChar()
             elif self.currentChar == "{":
-                tokens.append(Token(T_LCURL))
+                tokens.append(self.tokenizer(T_LCURL))
                 self.shiftChar()
             elif self.currentChar == "}":
-                tokens.append(Token(T_RPAREN))
+                tokens.append(self.tokenizer(T_RPAREN))
                 self.shiftChar()
             elif self.currentChar == "[":
-                tokens.append(Token(T_LBRAC))
+                tokens.append(self.tokenizer(T_LBRAC))
                 self.shiftChar()
             elif self.currentChar == "]":
-                tokens.append(Token(T_RBRAC))
+                tokens.append(self.tokenizer(T_RBRAC))
                 self.shiftChar()
+            elif self.currentChar == "<":
+                tokens.append(self.tokenizer(T_LESS))
+                self.shiftChar()
+            elif self.currentChar == ">":
+                tokens.append(self.tokenizer(T_GREATER))
+                self.shiftChar()
+            elif self.currentChar == "=":
+                tokens.append(self.tokenizer(T_ASIGN))
+                self.shiftChar()
+            elif self.currentChar == "==":
+                tokens.append(self.tokenizer(T_EQUAL))
+                self.shiftChar()
+            else:
+                #show some error
+                pass
+
 
         return tokens
+
+    def tokenizer(self, _type, val=None):
+        self.type = _type
+        self.value = val
+        if self.value != None:
+            return f"{self.value}:{self.type}"
+        else:
+            return f"{self.type}"
+
+    def numToken(self, num):
+        self.number = num
+        pass
 
 
 #####################
@@ -113,12 +128,8 @@ class Lexer:
 #####################
 
 
-#####################
-# Executer
-#####################
-
-def exec():
-    pass
-
-if __name__ == "__main__":
-    exec()
+def exec(text):
+    lexer = Lexer(text)
+    token = lexer.makeTokens()
+    
+    return token
