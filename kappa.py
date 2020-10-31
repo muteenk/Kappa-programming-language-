@@ -59,8 +59,8 @@ class Lexer:
         while self.currentChar != None:
             if self.currentChar == " " or self.currentChar == "\t" or self.currentChar == "\n" or self.currentChar == "":
                 self.shiftChar()
-            elif self.currentChar in NUMBERS:
-                tokens.append(self.numToken(self.currentChar))
+            elif self.currentChar in NUMBERS or self.currentChar == ".":
+                tokens.append(self.numToken())
             elif self.currentChar == "+":
                 tokens.append(self.tokenizer(T_PLUS))
                 self.shiftChar()
@@ -118,9 +118,31 @@ class Lexer:
         else:
             return f"{self.type}"
 
-    def numToken(self, num):
-        self.number = num
-        pass
+    def numToken(self):
+        dots = 0
+        num_str = ""
+        while True:
+            if self.currentChar in NUMBERS:
+                num_str = num_str + str(self.currentChar)
+                if self.text[self.pos+1] in NUMBERS or self.text[self.pos+1] == ".":
+                    self.shiftChar()
+                else:
+                    break
+            elif self.currentChar == ".":
+                num_str = num_str + self.currentChar
+                dots += 1
+                if dots > 1:
+                    break
+                self.shiftChar()
+            else:
+                break
+        
+        if "." in num_str:
+            temp_token = self.tokenizer(T_FLOAT, num_str)
+        else:
+            temp_token = self.tokenizer(T_INT, num_str)
+
+        return temp_token
 
 
 #####################
