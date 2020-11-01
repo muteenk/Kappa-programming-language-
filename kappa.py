@@ -61,6 +61,7 @@ class Lexer:
                 self.shiftChar()
             elif self.currentChar in NUMBERS or self.currentChar == ".":
                 tokens.append(self.numToken())
+                self.shiftChar()
             elif self.currentChar == "+":
                 tokens.append(self.tokenizer(T_PLUS))
                 self.shiftChar()
@@ -114,7 +115,7 @@ class Lexer:
         self.type = _type
         self.value = val
         if self.value != None:
-            return f"{self.value}:{self.type}"
+            return f"{self.type}:{self.value}"
         else:
             return f"{self.type}"
 
@@ -124,8 +125,11 @@ class Lexer:
         while True:
             if self.currentChar in NUMBERS:
                 num_str = num_str + str(self.currentChar)
-                if self.text[self.pos+1] in NUMBERS or self.text[self.pos+1] == ".":
-                    self.shiftChar()
+                if self.pos + 1 < len(self.text):
+                    if self.text[self.pos+1] in NUMBERS or self.text[self.pos+1] == ".":
+                        self.shiftChar()
+                    else:
+                        break
                 else:
                     break
             elif self.currentChar == ".":
@@ -139,9 +143,10 @@ class Lexer:
         
         if "." in num_str:
             temp_token = self.tokenizer(T_FLOAT, num_str)
+            
         else:
             temp_token = self.tokenizer(T_INT, num_str)
-
+            
         return temp_token
 
 
