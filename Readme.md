@@ -11,5 +11,5 @@ Its under development now, anyone can help and contribute in the development of 
 
 -----------------------------------
 
-## _NOTE : If you want to leave any suggestions, you can write them in suggestions.md
+## _NOTE : If you want to leave any suggestions, you can write them in suggestions.md_
 
