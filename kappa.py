@@ -22,10 +22,14 @@ T_PLUS = "PLUS"
 T_MIN = "MINUS"
 T_MUL = "MULTIPLY"
 T_DIV = "DIVIDE"
+T_NOT = "NOT"
 T_ASIGN = "ASSIGN"
 T_EQUAL = "EQUAL"
+T_NOTEQUAL = "NOTEQUAL"
 T_LESS = "LESS"
 T_GREATER = "GREATER"
+T_LEQUAL = "LEQUAL"
+T_GEQUAL = "GEQUAL"
 T_LCURL = "LCURLY"
 T_RCURL = "RCURLY"
 T_LBRAC = "LBRACKET"
@@ -74,6 +78,9 @@ class Lexer:
             elif self.currentChar == "/":
                 tokens.append(self.tokenizer(T_DIV))
                 self.shiftChar()
+            elif self.currentChar == "!":
+                tokens.append(self.tokenizer(T_NOT))
+                self.shiftChar()
             elif self.currentChar == "(":
                 tokens.append(self.tokenizer(T_LPAREN))
                 self.shiftChar()
@@ -100,9 +107,6 @@ class Lexer:
                 self.shiftChar()
             elif self.currentChar == "=":
                 tokens.append(self.tokenizer(T_ASIGN))
-                self.shiftChar()
-            elif self.currentChar == "==":
-                tokens.append(self.tokenizer(T_EQUAL))
                 self.shiftChar()
             else:
                 #show some error
@@ -143,7 +147,7 @@ class Lexer:
         
         if "." in num_str:
             temp_token = self.tokenizer(T_FLOAT, num_str)
-            
+
         else:
             temp_token = self.tokenizer(T_INT, num_str)
             
