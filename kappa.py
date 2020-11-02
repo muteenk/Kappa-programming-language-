@@ -1,10 +1,19 @@
 #####################
+# Imports
+#####################
+
+import re
+import argparse as ar
+
+#####################
 # Constants
 #####################
 
 NUMBERS = "1234567890"
 
 LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
+C_STRING = "^[\"][\"]$"
 
 #####################
 # Errors
@@ -108,8 +117,12 @@ class Lexer:
             elif self.currentChar == "=":
                 tokens.append(self.tokenizer(T_ASIGN, '='))
                 self.shiftChar()
+            elif self.currentChar in '"':
+                tokens.append(self.strToken())
+                self.shiftChar()
             else:
                 #show some error
+                print(self.currentChar)
                 a = "Not Found"
                 return a
 
@@ -153,6 +166,24 @@ class Lexer:
             
         return temp_token
 
+    
+    def strToken(self):
+        emp_str = ""
+        self.shiftChar()
+        while True:
+            if self.currentChar != '"' or self.currentChar !=  "'":
+                emp_str += self.currentChar
+                if self.pos + 1 < len(self.text):
+                    if self.text[self.pos+1] in NUMBERS or self.text[self.pos+1] == ".":
+                        self.shiftChar()
+                    else:
+                        break
+                else:
+                    break
+            else:
+                break
+
+        return self.tokenizer(T_STRING, emp_str)
 
 #####################
 # Parser
@@ -171,6 +202,8 @@ class Parser:
 
         return eval(calc)
                 
+    def parseStr(self):
+        return "this is a string"
         
 
 
@@ -186,5 +219,20 @@ def exec(text):
     lexer = Lexer(text)
     token = lexer.makeTokens()
     parser = Parser(token)
-    return parser.parseCalc()
+
+    return token
+    
+    str_count = 0
+
+    for tkn in token:
+        for key, value in tkn.items():
+            if key == T_STRING:
+                str_count += 1
+                break
+            
+    if str_count == 0:
+        return parser.parseCalc()
+    else:
+        return parser.parseStr()
+                
     
