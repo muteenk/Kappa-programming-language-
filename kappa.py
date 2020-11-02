@@ -62,66 +62,66 @@ class Lexer:
 
         while self.currentChar != None:
             if self.currentChar == " " or self.currentChar == "\t" or self.currentChar == "\n" or self.currentChar == "":
-                self.shiftChar()
+                return ""
             elif self.currentChar in NUMBERS or self.currentChar == ".":
                 tokens.append(self.numToken())
                 self.shiftChar()
             elif self.currentChar == "+":
-                tokens.append(self.tokenizer(T_PLUS))
+                tokens.append(self.tokenizer(T_PLUS, '+'))
                 self.shiftChar()
             elif self.currentChar == "-":
-                tokens.append(self.tokenizer(T_MIN))
+                tokens.append(self.tokenizer(T_MIN, '-'))
                 self.shiftChar() 
             elif self.currentChar == "*":
-                tokens.append(self.tokenizer(T_MUL))
+                tokens.append(self.tokenizer(T_MUL, '*'))
                 self.shiftChar()   
             elif self.currentChar == "/":
-                tokens.append(self.tokenizer(T_DIV))
+                tokens.append(self.tokenizer(T_DIV, '/'))
                 self.shiftChar()
             elif self.currentChar == "!":
-                tokens.append(self.tokenizer(T_NOT))
+                tokens.append(self.tokenizer(T_NOT, '!'))
                 self.shiftChar()
             elif self.currentChar == "(":
-                tokens.append(self.tokenizer(T_LPAREN))
+                tokens.append(self.tokenizer(T_LPAREN, '('))
                 self.shiftChar()
             elif self.currentChar == ")":
-                tokens.append(self.tokenizer(T_RPAREN))
+                tokens.append(self.tokenizer(T_RPAREN, ')'))
                 self.shiftChar()
             elif self.currentChar == "{":
-                tokens.append(self.tokenizer(T_LCURL))
+                tokens.append(self.tokenizer(T_LCURL, '{'))
                 self.shiftChar()
             elif self.currentChar == "}":
-                tokens.append(self.tokenizer(T_RPAREN))
+                tokens.append(self.tokenizer(T_RCURL, '}'))
                 self.shiftChar()
             elif self.currentChar == "[":
-                tokens.append(self.tokenizer(T_LBRAC))
+                tokens.append(self.tokenizer(T_LBRAC, '['))
                 self.shiftChar()
             elif self.currentChar == "]":
-                tokens.append(self.tokenizer(T_RBRAC))
+                tokens.append(self.tokenizer(T_RBRAC, ']'))
                 self.shiftChar()
             elif self.currentChar == "<":
-                tokens.append(self.tokenizer(T_LESS))
+                tokens.append(self.tokenizer(T_LESS, '<'))
                 self.shiftChar()
             elif self.currentChar == ">":
-                tokens.append(self.tokenizer(T_GREATER))
+                tokens.append(self.tokenizer(T_GREATER, '>'))
                 self.shiftChar()
             elif self.currentChar == "=":
-                tokens.append(self.tokenizer(T_ASIGN))
+                tokens.append(self.tokenizer(T_ASIGN, '='))
                 self.shiftChar()
             else:
                 #show some error
-                pass
+                a = "Not Found"
+                return a
 
 
         return tokens
 
-    def tokenizer(self, _type, val=None):
+    def tokenizer(self, _type, val):
         self.type = _type
         self.value = val
-        if self.value != None:
-            return f"{self.type}:{self.value}"
-        else:
-            return f"{self.type}"
+        
+        return {self.type:self.value}
+        
 
     def numToken(self):
         dots = 0
@@ -155,6 +155,29 @@ class Lexer:
 
 
 #####################
+# Parser
+####################
+
+class Parser:
+
+    def __init__(self, tok):
+        self.tok = tok
+
+    def parseCalc(self):
+        calc = ""
+        for tkn in self.tok:
+            for key, value in tkn.items():
+                calc += value
+
+        return eval(calc)
+                
+        
+
+
+
+
+
+#####################
 # Main Function
 #####################
 
@@ -162,5 +185,6 @@ class Lexer:
 def exec(text):
     lexer = Lexer(text)
     token = lexer.makeTokens()
+    parser = Parser(token)
+    return parser.parseCalc()
     
-    return token
