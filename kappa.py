@@ -117,7 +117,7 @@ class Lexer:
             elif self.currentChar == "=":
                 tokens.append(self.tokenizer(T_ASIGN, '='))
                 self.shiftChar()
-            elif self.currentChar in '"':
+            elif self.currentChar in '"' or self.currntChar in "'":
                 tokens.append(self.strToken())
                 self.shiftChar()
             else:
@@ -171,10 +171,10 @@ class Lexer:
         emp_str = ""
         self.shiftChar()
         while True:
-            if self.currentChar != '"' or self.currentChar !=  "'":
+            if self.currentChar not in '"' or self.currentChar not in "'":
                 emp_str += self.currentChar
                 if self.pos + 1 < len(self.text):
-                    if self.text[self.pos+1] in NUMBERS or self.text[self.pos+1] == ".":
+                    if self.text[self.pos+1] in LETTERS:
                         self.shiftChar()
                     else:
                         break
