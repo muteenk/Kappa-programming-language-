@@ -71,7 +71,7 @@ class Lexer:
 
         while self.currentChar != None:
             if self.currentChar == " " or self.currentChar == "\t" or self.currentChar == "\n" or self.currentChar == "":
-                return ""
+                self.shiftChar()
             elif self.currentChar in NUMBERS or self.currentChar == ".":
                 tokens.append(self.numToken())
                 self.shiftChar()
@@ -117,7 +117,7 @@ class Lexer:
             elif self.currentChar == "=":
                 tokens.append(self.tokenizer(T_ASIGN, '='))
                 self.shiftChar()
-            elif self.currentChar in '"':
+            elif self.currentChar in '"' or self.currentChar in "'":
                 tokens.append(self.strToken())
                 self.shiftChar()
             else:
@@ -171,17 +171,14 @@ class Lexer:
         emp_str = ""
         self.shiftChar()
         while True:
-            if self.currentChar != '"' or self.currentChar !=  "'":
+            if self.currentChar == "\"" or self.currentChar == "\'":
+                break
+            else:
                 emp_str += self.currentChar
                 if self.pos + 1 < len(self.text):
-                    if self.text[self.pos+1] in NUMBERS or self.text[self.pos+1] == ".":
-                        self.shiftChar()
-                    else:
-                        break
+                    self.shiftChar()
                 else:
                     break
-            else:
-                break
 
         return self.tokenizer(T_STRING, emp_str)
 
@@ -199,7 +196,7 @@ class Parser:
         for tkn in self.tok:
             for key, value in tkn.items():
                 calc += value
-
+                
         return eval(calc)
                 
     def parseStr(self):
@@ -219,10 +216,10 @@ def exec(text):
     lexer = Lexer(text)
     token = lexer.makeTokens()
     parser = Parser(token)
-
-    return token
     
     str_count = 0
+
+    # return token
 
     for tkn in token:
         for key, value in tkn.items():
