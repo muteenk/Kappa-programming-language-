@@ -13,3 +13,13 @@ Its under development now, anyone can help and contribute in the development of 
 
 ## _NOTE : If you want to leave any suggestions, you can write them in suggestions.md_
 
+---
+
+# Milestones Achived:
+
+-[x] Basic Lexical Analysis
+-[x] Basic Kappa Shell
+-[x] Basic Arithmatic and Logical parser {Strings incomplete}
+
+
+
