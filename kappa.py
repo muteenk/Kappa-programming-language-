@@ -20,6 +20,13 @@ C_STRING = "^[\"][\"]$"
 #####################
 
 
+class Error:
+
+    def __init__(self, errType, line):
+        self.err = errType
+        self.line
+
+
 #####################
 # Tokens
 #####################
