@@ -205,7 +205,7 @@ class Lexer:
                     if self.pos + 1 < len(self.text):
                         self.shiftChar()
                     else:
-                        return f"Missing (\") at the end of string !!!"
+                        return "Missing (\") at the end of string !!!"
             
             elif strType == "\'":
                 if self.currentChar == "\'":
@@ -215,7 +215,7 @@ class Lexer:
                     if self.pos + 1 < len(self.text):
                         self.shiftChar()
                     else:
-                        return f"Missing (\') at the end of string !!!"
+                        return "Missing (\') at the end of string !!!"
 
 
         return self.tokenizer(T_STRING, emp_str)
