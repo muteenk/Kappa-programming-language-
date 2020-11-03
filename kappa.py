@@ -53,12 +53,16 @@ T_RPAREN = "RPARENTHESIS"
 
 class Lexer:
 
+
     def __init__(self, text):
         self.text = text
         self.pos = -1
         self.currentChar = None
         self.shiftChar()
 
+
+
+    # TO SHIFT THE CURRENT CHARACTER 
     def shiftChar(self):
         self.pos += 1
         if self.pos < len(self.text):
@@ -66,6 +70,10 @@ class Lexer:
         else:
             self.currentChar = None
 
+
+
+
+    # TO BUILD TOKENS BASED ON EACH CHARACTER
     def makeTokens(self):
         tokens = []
 
@@ -117,24 +125,29 @@ class Lexer:
             elif self.currentChar == "=":
                 tokens.append(self.tokenizer(T_ASIGN, '='))
                 self.shiftChar()
-            elif self.currentChar in '"' or self.currentChar in "'":
+            elif self.currentChar in "\"" or self.currentChar in "\'":
                 tokens.append(self.strToken())
                 self.shiftChar()
             else:
                 #show some error
-                print(self.currentChar)
                 a = "Not Found"
                 return a
 
-
         return tokens
 
+
+
+
+
+
+    # HELPING TO CREATE TOKENS
     def tokenizer(self, _type, val):
         self.type = _type
         self.value = val
         
         return {self.type:self.value}
         
+
 
     def numToken(self):
         dots = 0
@@ -169,16 +182,29 @@ class Lexer:
     
     def strToken(self):
         emp_str = ""
+        strType = self.currentChar
         self.shiftChar()
         while True:
-            if self.currentChar == "\"" or self.currentChar == "\'":
-                break
-            else:
-                emp_str += self.currentChar
-                if self.pos + 1 < len(self.text):
-                    self.shiftChar()
-                else:
+            if strType == "\"":
+                if self.currentChar == "\"":
                     break
+                else:
+                    emp_str += self.currentChar
+                    if self.pos + 1 < len(self.text):
+                        self.shiftChar()
+                    else:
+                        break
+            
+            elif strType == "\'":
+                if self.currentChar == "\'":
+                    break
+                else:
+                    emp_str += self.currentChar
+                    if self.pos + 1 < len(self.text):
+                        self.shiftChar()
+                    else:
+                        break
+
 
         return self.tokenizer(T_STRING, emp_str)
 
@@ -196,7 +222,7 @@ class Parser:
         for tkn in self.tok:
             for key, value in tkn.items():
                 calc += value
-                
+
         return eval(calc)
                 
     def parseStr(self):
@@ -221,15 +247,18 @@ def exec(text):
 
     # return token
 
-    for tkn in token:
-        for key, value in tkn.items():
-            if key == T_STRING:
-                str_count += 1
-                break
+    try:
+        for tkn in token:
+            for key, value in tkn.items():
+                if key == T_STRING:
+                    str_count += 1
+                    break
             
-    if str_count == 0:
-        return parser.parseCalc()
-    else:
-        return parser.parseStr()
+        if str_count == 0:
+            return parser.parseCalc()
+        else:
+            return parser.parseStr()
+    except:
+        return token
                 
     
