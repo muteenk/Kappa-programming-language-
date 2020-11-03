@@ -126,8 +126,13 @@ class Lexer:
                 tokens.append(self.tokenizer(T_ASIGN, '='))
                 self.shiftChar()
             elif self.currentChar in "\"" or self.currentChar in "\'":
-                tokens.append(self.strToken())
-                self.shiftChar()
+                temp_bool = self.strToken()
+
+                if type(temp_bool) == dict:
+                    tokens.append(temp_bool)
+                    self.shiftChar()
+                elif type(temp_bool) == str:
+                    return temp_bool
             else:
                 #show some error
                 a = "Not Found"
@@ -193,7 +198,7 @@ class Lexer:
                     if self.pos + 1 < len(self.text):
                         self.shiftChar()
                     else:
-                        break
+                        return f"Missing (\") at the end of string !!!"
             
             elif strType == "\'":
                 if self.currentChar == "\'":
@@ -203,10 +208,15 @@ class Lexer:
                     if self.pos + 1 < len(self.text):
                         self.shiftChar()
                     else:
-                        break
+                        return f"Missing (\') at the end of string !!!"
 
 
         return self.tokenizer(T_STRING, emp_str)
+
+
+
+
+
 
 #####################
 # Parser
@@ -225,9 +235,15 @@ class Parser:
 
         return eval(calc)
                 
+
     def parseStr(self):
-        return "this is a string"
-        
+
+        newStr = ""
+        for tkn in self.tok:
+            for key, value in tkn.items():
+                newStr += value
+
+        return newStr        
 
 
 
