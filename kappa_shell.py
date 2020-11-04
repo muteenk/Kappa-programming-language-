@@ -7,5 +7,8 @@ while True:
     if inp == "--exit":
         break
 
+    elif inp == "":
+        continue
+
     else:
         print(kappa.exec(inp))
