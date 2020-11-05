@@ -20,8 +20,9 @@ Its under development now, anyone can help and contribute in the development of 
 - [x] Basic Lexical Analysis
 - [x] Basic Kappa Shell
 - [x] String Token
-- [x] Basic Arithmatic and Logical parser {Strings incomplete}
+- [x] Basic Arithmatic and Logical parser
 - [x] "--exit" keyword to exit shell
+- [x] "--clear" keyword to clear shell
 
 
 
