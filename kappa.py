@@ -43,13 +43,12 @@ T_RPAREN = "RPARENTHESIS"
 T_NEWLINE = "NLINE"
 
 
-
 #####################
 # Errors
 #####################
 
 def error(errType, line):
-    return "Error Raised at line " + line + "\n" + errType
+    return "kappaError:\n\t" + errType + "\n\toccured at line" + str(line)
 
 
 #####################
@@ -57,8 +56,6 @@ def error(errType, line):
 #####################
 
 class Lexer:
-
-
     def __init__(self, text):
         self.line = 1
         self.text = text
@@ -67,8 +64,7 @@ class Lexer:
         self.shiftChar()
 
 
-
-    # TO SHIFT THE CURRENT CHARACTER 
+    # TO SHIFT THE CURRENT CHARACTER
     def shiftChar(self):
         self.pos += 1
         if self.pos < len(self.text):
@@ -95,10 +91,10 @@ class Lexer:
                 self.shiftChar()
             elif self.currentChar == "-":
                 tokens.append(self.tokenizer(T_MIN, '-'))
-                self.shiftChar() 
+                self.shiftChar()
             elif self.currentChar == "*":
                 tokens.append(self.tokenizer(T_MUL, '*'))
-                self.shiftChar()   
+                self.shiftChar()
             elif self.currentChar == "/":
                 tokens.append(self.tokenizer(T_DIV, '/'))
                 self.shiftChar()
@@ -141,24 +137,19 @@ class Lexer:
                 elif type(temp_bool) == str:
                     return temp_bool
             else:
-                #show some error
-                a = "kappaError:\n\t(" + self.currentChar + ") NOT FOUND"
-                return a
+                # show some error
+                e = "invalid character error ('" + self.currentChar + "')"
+                return error(e, self.line)
 
         return tokens
-
-
-
-
 
 
     # HELPING TO CREATE TOKENS
     def tokenizer(self, _type, val):
         self.type = _type
         self.value = val
-        
-        return {self.type:self.value}
-        
+
+        return {self.type: self.value}
 
 
     # CREATING NUMBER TOKENS
@@ -169,7 +160,7 @@ class Lexer:
             if self.currentChar in NUMBERS:
                 num_str = num_str + str(self.currentChar)
                 if self.pos + 1 < len(self.text):
-                    if self.text[self.pos+1] in NUMBERS or self.text[self.pos+1] == ".":
+                    if self.text[self.pos + 1] in NUMBERS or self.text[self.pos + 1] == ".":
                         self.shiftChar()
                     else:
                         break
@@ -183,15 +174,14 @@ class Lexer:
                 self.shiftChar()
             else:
                 break
-        
+
         if "." in num_str:
             temp_token = self.tokenizer(T_FLOAT, num_str)
 
         else:
             temp_token = self.tokenizer(T_INT, num_str)
-            
-        return temp_token
 
+        return temp_token
 
 
     # CREATING STRING TOKEN
@@ -208,8 +198,8 @@ class Lexer:
                     if self.pos + 1 < len(self.text):
                         self.shiftChar()
                     else:
-                        return "kappaError: Missing (\") at the end of a string !!!"
-            
+                        return error("missing (\") at the end of a string", self.line)
+
             elif strType == "\'":
                 if self.currentChar == "\'":
                     break
@@ -218,14 +208,9 @@ class Lexer:
                     if self.pos + 1 < len(self.text):
                         self.shiftChar()
                     else:
-                        return "kappaError: Missing (\') at the end of a string !!!"
-
+                        return error("missing (\') at the end of a string", self.line)
 
         return self.tokenizer(T_STRING, emp_str)
-
-
-
-
 
 
 #####################
@@ -233,9 +218,8 @@ class Lexer:
 ####################
 
 class Parser:
-
     def __init__(self, tok):
-        
+
         self.tok = tok
         self.currentTok = None
         self.tok_pos = -1
@@ -254,30 +238,56 @@ class Parser:
         calc = ""
         for tkn in self.tok:
             for key, value in tkn.items():
+                self.shiftTok()
                 calc += value
 
         return eval(calc)
-                
+
 
     def parseStr(self):
-
         newStr = ""
         for tkn in self.tok:
             for key, value in tkn.items():
+                self.shiftTok()
                 newStr += value
 
-        return newStr  
-
-
-    def concStr(self):
-        newStr = ""
-        for tkn in self.tok:
-            for key, value in tkn.items():
-                if key != T_PLUS:
-                    newStr += value      
         return newStr
 
+    def oppStr(self):
+        newStr = ''
 
+        for tkn in self.tok:
+            for key, value in tkn.items():
+                self.shiftTok()
+                if key == T_STRING:
+                    toadd = '"'+value+'"'
+                    newStr += toadd
+                elif key == T_PLUS or key == T_MUL or key == T_INT or key == T_FLOAT :
+                    newStr += value
+                else:
+                    return 'error'
+
+        return eval(newStr)
+
+
+    def main(self):
+
+        str_count = 0
+        str_opp_count = 0
+
+        for tkn in self.tok:
+            for key, value in tkn.items():
+                if key == T_STRING:
+                    str_count += 1
+                elif key == T_PLUS or key == T_MUL:
+                    str_opp_count += 1
+
+        if str_count == 0 and (str_opp_count != 0 or str_opp_count == 0):
+            return self.parseCalc()
+        elif str_count != 0 and str_opp_count == 0:
+            return self.parseStr()
+        elif str_count != 0 and str_opp_count != 0:
+            return self.oppStr()
 
 
 #####################
@@ -289,34 +299,8 @@ def exec(text):
     lexer = Lexer(text)
     token = lexer.makeTokens()
     parser = Parser(token)
+    try:
+        return parser.main()
 
-
-    
-    # str_count = 0
-    # conc_count = 0
-
-
-
-    # return token
-
-    # try:
-    #     for tkn in token:
-    #         for key, value in tkn.items():
-    #             if key == T_STRING:
-    #                 str_count += 1
-    #             elif key == T_PLUS:
-    #                 conc_count += 1
-    #             elif key == T_NEWLINE:
-    #                 cLine += 1
-            
-    #     if str_count == 0:
-    #         return parser.parseCalc()
-    #     elif str_count != 0 and conc_count == 0:
-    #         return parser.parseStr()
-    #     elif str_count != 0 and conc_count != 0:
-    #         return parser.concStr()
-
-    # except:
-    #     return token
-                
-    
+    except:
+        return token
