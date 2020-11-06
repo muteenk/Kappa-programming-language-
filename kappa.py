@@ -42,7 +42,6 @@ T_LPAREN = "LPARENTHESIS"
 T_RPAREN = "RPARENTHESIS"
 T_NEWLINE = "NLINE"
 T_SPACE = "SPACE"
-T_TAB = "TAB"
 
 
 #####################
