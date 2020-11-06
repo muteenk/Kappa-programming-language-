@@ -264,6 +264,10 @@ class Parser:
                     newStr += toadd
                 elif key == T_PLUS or key == T_MUL or key == T_INT or key == T_FLOAT :
                     newStr += value
+                elif key == T_GREATER or key == T_EQUAL or key == T_LESS or key == T_NOTEQUAL:
+                    newStr += value
+                elif key == T_LEQUAL or key == T_GEQUAL:
+                    newStr += value
                 else:
                     return 'error'
 
@@ -280,6 +284,10 @@ class Parser:
                 if key == T_STRING:
                     str_count += 1
                 elif key == T_PLUS or key == T_MUL:
+                    str_opp_count += 1
+                elif key == T_EQUAL or key == T_NOTEQUAL or key == T_LEQUAL or key == T_GEQUAL:
+                    str_opp_count += 1
+                elif key == T_GREATER or key == T_LESS:
                     str_opp_count += 1
 
         if str_count == 0 and (str_opp_count != 0 or str_opp_count == 0):
