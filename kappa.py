@@ -49,7 +49,7 @@ T_SPACE = "SPACE"
 #####################
 
 def error(errType, line, pos):
-    return "kappaError:\n\t" + errType + "\n\toccured in <line" + str(line) + '> at <character' + str(pos + 1) + '>'
+    return "kappaError:\n\t" + errType + ";\n\toccured in <line" + str(line) + '> at <character' + str(pos + 1) + '>'
 
 
 
@@ -277,20 +277,33 @@ class Parser:
 
     def oppStr(self):
         newStr = ''
-
+        currOpp = ''
         for tkn in self.tok:
+
             for key, value in tkn.items():
-                lnt = len(newStr)
-                if key == T_STRING:
-                    toadd = '"'+value+'"'
-                    newStr += toadd
-                elif key == T_PLUS or key == T_MUL or key == T_INT or key == T_FLOAT or key == T_SPACE:
+                ln = len(newStr)
+                if currOpp == '*' and key == T_STRING:
+                    e = "can't multiply string value ({0}) with a string".format(value)
+                    return error(e, self.line, ln)
+                elif currOpp == '*' and key == T_INT:
                     newStr += value
-                elif key == T_LPAREN or key == T_RPAREN:
+                elif currOpp == '+' and key == T_INT:
+                    e = "can't add the integer value ({0}) with a string".format(value)
+                    return error(e, self.line, ln)
+                elif key == T_STRING:
+                    to_add = '"'+value+'"'
+                    newStr += to_add
+                elif key == T_PLUS or key == T_MUL:
                     newStr += value
+                    currOpp = value
+                elif key == T_LPAREN or key == T_RPAREN or key == T_SPACE:
+                    newStr += value
+                elif key == T_FLOAT:
+                    e = "can't perform an operation on float value ({0}) with string".format(value)
+                    return error(e, self.line, ln)
                 else:
-                    e = 'invalid operator ({0}) for string'.format(value)
-                    return error(e, self.line, lnt)
+                    e = 'invalid operator/(character) ({0}) for string'.format(value)
+                    return error(e, self.line, ln)
 
             self.shiftTok()
         return eval(newStr)
