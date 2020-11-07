@@ -139,18 +139,6 @@ class Lexer:
                     self.shiftChar()
                 elif type(temp_bool) == str:
                     return temp_bool
-            elif self.currentChar == "==":
-                tokens.append(self.tokenizer(T_EQUAL, "=="))
-                self.shiftChar()
-            elif self.currentChar == "<=":
-                tokens.append(self.tokenizer(T_LEQUAL, "<="))
-                self.shiftChar()
-            elif self.currentChar == ">=":
-                tokens.append(self.tokenizer(T_GEQUAL, ">="))
-                self.shiftChar()
-            elif self.currentChar == "!=":
-                tokens.append(self.tokenizer(T_NOTEQUAL, "!="))
-                self.shiftChar()
             else:
 
                 # show some error
