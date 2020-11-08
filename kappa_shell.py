@@ -22,7 +22,11 @@ while True:
                 _ = system('clear')
 
         else:
-            print(kappa.exec(inp))
+            opt = kappa.exec(inp)
+            if opt == None:
+                continue
+            else:
+                print(opt)
 
     except KeyboardInterrupt:
         print("keyboard interrupted:\n\tif u want to exit the kappa shell type => (--exit) keyword")

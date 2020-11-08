@@ -11,7 +11,7 @@ import argparse as ar
 
 NUMBERS = "1234567890"
 
-LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+CHARS = "_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
 C_STRING = "^[\"][\"]$"
 
@@ -41,15 +41,30 @@ T_RBRAC = "RBRACKET"
 T_LPAREN = "LPARENTHESIS"
 T_RPAREN = "RPARENTHESIS"
 T_NEWLINE = "NLINE"
-T_SPACE = "SPACE"
+T_VAR = "VAR"
+
+#####################
+# BUILT OBJECTS 
+#####################
+
+PRE_OBJECTS = [T_VAR, T_STRING, T_INT, T_FLOAT]
+
+######################
+# VARIABLE LIST
+######################
+
+varList = []
 
 
 #####################
 # Errors
 #####################
 
-def error(errType, line, pos):
-    return "kappaError:\n\t" + errType + ";\n\toccured in <line" + str(line) + '> at <character' + str(pos + 1) + '>'
+def error(errType, line, pos=None):
+    if pos:
+        return "kappaError:\n\t" + errType + ";\n\toccured in <line" + str(line) + '> at <character' + str(pos + 1) + '>'
+    else:
+        return "kappaError:\n\t" + errType + ";\n\toccured in <line" + str(line) + '>'
 
 
 
@@ -80,58 +95,90 @@ class Lexer:
         tokens = []
 
         while self.currentChar != None:
+
             if self.currentChar == " " or self.currentChar == "\t" or self.currentChar == "\n" or self.currentChar == "":
                 if self.currentChar == "\n":
                     tokens.append(self.tokenizer(T_NEWLINE, r"\n"))
                     self.line += 1
-                elif self.currentChar == " ":
-                    tokens.append(self.tokenizer(T_SPACE, " "))
                 self.shiftChar()
+
             elif self.currentChar in NUMBERS or self.currentChar == ".":
                 tokens.append(self.numToken())
                 self.shiftChar()
+
+            elif self.currentChar in CHARS:
+                temp_type = self.varToken()
+                if type(temp_type) == dict:
+                    tokens.append(temp_type)
+                    continue
+                elif type(temp_type) == str:
+                    return temp_type
+
             elif self.currentChar == "+":
                 tokens.append(self.tokenizer(T_PLUS, '+'))
                 self.shiftChar()
+
             elif self.currentChar == "-":
                 tokens.append(self.tokenizer(T_MIN, '-'))
                 self.shiftChar()
+
             elif self.currentChar == "*":
                 tokens.append(self.tokenizer(T_MUL, '*'))
                 self.shiftChar()
+
             elif self.currentChar == "/":
                 tokens.append(self.tokenizer(T_DIV, '/'))
                 self.shiftChar()
+
             elif self.currentChar == "!":
                 tokens.append(self.tokenizer(T_NOT, "!"))
                 self.shiftChar()
+
             elif self.currentChar == "(":
                 tokens.append(self.tokenizer(T_LPAREN, '('))
                 self.shiftChar()
+
             elif self.currentChar == ")":
                 tokens.append(self.tokenizer(T_RPAREN, ')'))
                 self.shiftChar()
+
             elif self.currentChar == "{":
                 tokens.append(self.tokenizer(T_LCURL, '{'))
                 self.shiftChar()
+
             elif self.currentChar == "}":
                 tokens.append(self.tokenizer(T_RCURL, '}'))
                 self.shiftChar()
+
             elif self.currentChar == "[":
                 tokens.append(self.tokenizer(T_LBRAC, '['))
                 self.shiftChar()
+
             elif self.currentChar == "]":
                 tokens.append(self.tokenizer(T_RBRAC, ']'))
                 self.shiftChar()
+
             elif self.currentChar == "<":
                 tokens.append(self.tokenizer(T_LESS, '<'))
                 self.shiftChar()
+
             elif self.currentChar == ">":
                 tokens.append(self.tokenizer(T_GREATER, '>'))
                 self.shiftChar()
+
             elif self.currentChar == "=":
-                tokens.append(self.tokenizer(T_ASIGN, '='))
+                recent_tok = tokens[len(tokens)-1]
+
+                for i in recent_tok:
+                    recent_tok_type = i
+
+                if recent_tok_type == T_VAR:
+                    tokens.append(self.tokenizer(T_ASIGN, '='))
+                else:
+                    e = "invalid operator error (=)"
+                    return error(e, self.line, self.pos)
                 self.shiftChar()
+
             elif self.currentChar in "\"" or self.currentChar in "\'":
                 temp_bool = self.strToken()
                 if type(temp_bool) == dict:
@@ -139,8 +186,8 @@ class Lexer:
                     self.shiftChar()
                 elif type(temp_bool) == str:
                     return temp_bool
-            else:
 
+            else:
                 # show some error
                 e = "invalid character error ('" + self.currentChar + "')"
                 return error(e, self.line, self.pos)
@@ -221,6 +268,19 @@ class Lexer:
         return self.tokenizer(T_STRING, emp_str)
 
 
+    def varToken(self):
+        var_str = "" 
+
+        while self.currentChar != None: 
+            if self.currentChar not in CHARS and self.currentChar not in NUMBERS: 
+                break
+            else:
+                var_str += self.currentChar
+                self.shiftChar()
+
+        
+        return self.tokenizer(T_VAR, var_str)
+
 #####################
 # Parser
 ####################
@@ -240,6 +300,69 @@ class Parser:
             self.currentTok = self.tok[self.tok_pos]
         else:
             self.currentTok = None
+
+    def main(self):
+
+        str_count = 0
+        str_opp_count = 0
+        var_count = 0
+
+        for tkn in self.tok:
+            for key, value in tkn.items():
+                if key == T_STRING:
+                    str_count += 1
+                elif key == T_VAR:
+                    var_count += 1
+                elif key == T_PLUS or key == T_MUL or key == T_DIV or key == T_MUL:
+                    str_opp_count += 1
+                elif key == T_EQUAL or key == T_NOTEQUAL or key == T_LEQUAL or key == T_GEQUAL:
+                    str_opp_count += 1
+                elif key == T_GREATER or key == T_LESS or key == T_LPAREN or key == T_RPAREN:
+                    str_opp_count += 1
+                elif key == T_ASIGN or key == T_LBRAC or key == T_RBRAC or key == T_RCURL or key == T_LCURL:
+                    str_opp_count += 1
+
+
+        if str_count == 0 and var_count == 0:
+            return self.parseCalc()
+        elif str_count != 0 and str_opp_count == 0 and var_count == 0:
+            return self.parseStr()
+        elif str_count != 0 and str_opp_count != 0 and var_count == 0:
+            return self.oppStr()
+        elif var_count > 0:
+            return self.parseVar()
+
+    def parseVar(self):
+        varnm = self.tok[0][T_VAR]
+        self.shiftTok()
+        
+        for x in self.currentTok:
+            if self.currentTok[x] == "=":
+                self.shiftTok()
+                for y in self.currentTok:
+                    if y in PRE_OBJECTS:
+                        for z in varList:
+                            if varnm == z[0]:
+                                z[1] = self.currentTok[y]
+                                return None
+                            else:
+                                lst = [varnm, self.currentTok[y], y]
+                                varList.append(lst)
+                                return None
+                    else:
+                        return error("invalid value assigned to variable (" + varnm + ")", self.line)
+            else:
+                for y in varList:
+                    if varnm == y[0]:
+                        return y[1]
+                    else:
+                        return error("variable (" + varnm + ") is not defined", self.line)
+                
+                
+
+        
+
+
 
 
     def parseCalc(self):
@@ -284,7 +407,7 @@ class Parser:
                 elif key == T_PLUS or key == T_MUL:
                     newStr += value
                     currOpp = value
-                elif key == T_LPAREN or key == T_RPAREN or key == T_SPACE:
+                elif key == T_LPAREN or key == T_RPAREN:
                     newStr += value
                 elif key == T_FLOAT:
                     e = "can't perform an operation on float value ({0}) with string".format(value)
@@ -296,32 +419,6 @@ class Parser:
             self.shiftTok()
         return eval(newStr)
 
-
-    def main(self):
-
-        str_count = 0
-        str_opp_count = 0
-
-        for tkn in self.tok:
-            for key, value in tkn.items():
-                if key == T_STRING:
-                    str_count += 1
-                elif key == T_PLUS or key == T_MUL or key == T_DIV or key == T_MUL:
-                    str_opp_count += 1
-                elif key == T_EQUAL or key == T_NOTEQUAL or key == T_LEQUAL or key == T_GEQUAL:
-                    str_opp_count += 1
-                elif key == T_GREATER or key == T_LESS or key == T_LPAREN or key == T_RPAREN:
-                    str_opp_count += 1
-                elif key == T_ASIGN or key == T_LBRAC or key == T_RBRAC or key == T_RCURL or key == T_LCURL:
-                    str_opp_count += 1
-
-
-        if str_count == 0:
-            return self.parseCalc()
-        elif str_count != 0 and str_opp_count == 0:
-            return self.parseStr()
-        elif str_count != 0 and str_opp_count != 0:
-            return self.oppStr()
 
 
 #####################
